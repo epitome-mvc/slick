@@ -1,12 +1,11 @@
 /*
----
-name: Slick.Parser
-description: Standalone CSS3 Selector parser
-provides: Slick.Parser
-...
-*/
-
-;(function(){
+ ---
+ name: Slick.Parser
+ description: Standalone CSS3 Selector parser
+ provides: Slick.Parser
+ ...
+ */
+'use strict';
 
 var parsed,
 	separatorIndex,
@@ -65,66 +64,47 @@ var reverse = function(expression){
 var escapeRegExp = (function(){
 	// Credit: XRegExp 0.6.1 (c) 2007-2008 Steven Levithan <http://stevenlevithan.com/regex/xregexp/> MIT License
 	var from = /(?=[\-\[\]{}()*+?.\\\^$|,#\s])/g, to = '\\';
-	return function(string){ return string.replace(from, to) }
-}())
+	return function(string){
+		return string.replace(from, to);
+	};
+}());
 
 var regexp = new RegExp(
-/*
-#!/usr/bin/env ruby
-puts "\t\t" + DATA.read.gsub(/\(\?x\)|\s+#.*$|\s+|\\$|\\n/,'')
-__END__
-	"(?x)^(?:\
-	  \\s* ( , ) \\s*               # Separator          \n\
-	| \\s* ( <combinator>+ ) \\s*   # Combinator         \n\
-	|      ( \\s+ )                 # CombinatorChildren \n\
-	|      ( <unicode>+ | \\* )     # Tag                \n\
-	| \\#  ( <unicode>+       )     # ID                 \n\
-	| \\.  ( <unicode>+       )     # ClassName          \n\
-	|                               # Attribute          \n\
-	\\[  \
-		\\s* (<unicode1>+)  (?:  \
-			\\s* ([*^$!~|]?=)  (?:  \
-				\\s* (?:\
-					([\"']?)(.*?)\\9 \
-				)\
-			)  \
-		)?  \\s*  \
-	\\](?!\\]) \n\
-	|   :+ ( <unicode>+ )(?:\
-	\\( (?:\
-		(?:([\"'])([^\\12]*)\\12)|((?:\\([^)]+\\)|[^()]*)+)\
-	) \\)\
-	)?\
-	)"
-*/
+	/*
+	 #!/usr/bin/env ruby
+	 puts "\t\t" + DATA.read.gsub(/\(\?x\)|\s+#.*$|\s+|\\$|\\n/,'')
+	 __END__
+	 "(?x)^(?:\
+	 \\s* ( , ) \\s*               # Separator          \n\
+	 | \\s* ( <combinator>+ ) \\s*   # Combinator         \n\
+	 |      ( \\s+ )                 # CombinatorChildren \n\
+	 |      ( <unicode>+ | \\* )     # Tag                \n\
+	 | \\#  ( <unicode>+       )     # ID                 \n\
+	 | \\.  ( <unicode>+       )     # ClassName          \n\
+	 |                               # Attribute          \n\
+	 \\[  \
+	 \\s* (<unicode1>+)  (?:  \
+	 \\s* ([*^$!~|]?=)  (?:  \
+	 \\s* (?:\
+	 ([\"']?)(.*?)\\9 \
+	 )\
+	 )  \
+	 )?  \\s*  \
+	 \\](?!\\]) \n\
+	 |   :+ ( <unicode>+ )(?:\
+	 \\( (?:\
+	 (?:([\"'])([^\\12]*)\\12)|((?:\\([^)]+\\)|[^()]*)+)\
+	 ) \\)\
+	 )?\
+	 )"
+	 */
 	"^(?:\\s*(,)\\s*|\\s*(<combinator>+)\\s*|(\\s+)|(<unicode>+|\\*)|\\#(<unicode>+)|\\.(<unicode>+)|\\[\\s*(<unicode1>+)(?:\\s*([*^$!~|]?=)(?:\\s*(?:([\"']?)(.*?)\\9)))?\\s*\\](?!\\])|(:+)(<unicode>+)(?:\\((?:(?:([\"'])([^\\13]*)\\13)|((?:\\([^)]+\\)|[^()]*)+))\\))?)"
-	.replace(/<combinator>/, '[' + escapeRegExp(">+~`!@$%^&={}\\;</") + ']')
-	.replace(/<unicode>/g, '(?:[\\w\\u00a1-\\uFFFF-]|\\\\[^\\s0-9a-f])')
-	.replace(/<unicode1>/g, '(?:[:\\w\\u00a1-\\uFFFF-]|\\\\[^\\s0-9a-f])')
+		.replace(/<combinator>/, '[' + escapeRegExp(">+~`!@$%^&={}\\;</") + ']')
+		.replace(/<unicode>/g, '(?:[\\w\\u00a1-\\uFFFF-]|\\\\[^\\s0-9a-f])')
+		.replace(/<unicode1>/g, '(?:[:\\w\\u00a1-\\uFFFF-]|\\\\[^\\s0-9a-f])')
 );
 
-function parser(
-	rawMatch,
-
-	separator,
-	combinator,
-	combinatorChildren,
-
-	tagName,
-	id,
-	className,
-
-	attributeKey,
-	attributeOperator,
-	attributeQuote,
-	attributeValue,
-
-	pseudoMarker,
-	pseudoClass,
-	pseudoQuote,
-	pseudoClassQuotedValue,
-	pseudoClassValue
-){
+function parser(rawMatch, separator, combinator, combinatorChildren, tagName, id, className, attributeKey, attributeOperator, attributeQuote, attributeValue, pseudoMarker, pseudoClass, pseudoQuote, pseudoClassQuotedValue, pseudoClassValue){
 	if (separator || separatorIndex === -1){
 		parsed.expressions[++separatorIndex] = [];
 		combinatorIndex = -1;
@@ -176,25 +156,40 @@ function parser(
 		var test, regexp;
 
 		switch (attributeOperator){
-			case '^=' : regexp = new RegExp(       '^'+ escapeRegExp(attributeValue)            ); break;
-			case '$=' : regexp = new RegExp(            escapeRegExp(attributeValue) +'$'       ); break;
-			case '~=' : regexp = new RegExp( '(^|\\s)'+ escapeRegExp(attributeValue) +'(\\s|$)' ); break;
-			case '|=' : regexp = new RegExp(       '^'+ escapeRegExp(attributeValue) +'(-|$)'   ); break;
-			case  '=' : test = function(value){
-				return attributeValue == value;
-			}; break;
-			case '*=' : test = function(value){
-				return value && value.indexOf(attributeValue) > -1;
-			}; break;
-			case '!=' : test = function(value){
-				return attributeValue != value;
-			}; break;
-			default   : test = function(value){
-				return !!value;
-			};
+			case '^=' :
+				regexp = new RegExp('^' + escapeRegExp(attributeValue));
+				break;
+			case '$=' :
+				regexp = new RegExp(escapeRegExp(attributeValue) + '$');
+				break;
+			case '~=' :
+				regexp = new RegExp('(^|\\s)' + escapeRegExp(attributeValue) + '(\\s|$)');
+				break;
+			case '|=' :
+				regexp = new RegExp('^' + escapeRegExp(attributeValue) + '(-|$)');
+				break;
+			case  '=' :
+				test = function(value){
+					return attributeValue == value;
+				};
+				break;
+			case '*=' :
+				test = function(value){
+					return value && value.indexOf(attributeValue) > -1;
+				};
+				break;
+			case '!=' :
+				test = function(value){
+					return attributeValue != value;
+				};
+				break;
+			default   :
+				test = function(value){
+					return !!value;
+				};
 		}
 
-		if (attributeValue == '' && (/^[*$^]=$/).test(attributeOperator)) test = function(){
+		if (attributeValue === '' && (/^[*$^]=$/).test(attributeOperator)) test = function(){
 			return false;
 		};
 
@@ -213,18 +208,11 @@ function parser(
 	}
 
 	return '';
+}
+
+module.exports = {
+	parse: function(expression){
+		return parse(expression);
+	},
+	escapeRegExp: escapeRegExp
 };
-
-// Slick NS
-
-var Slick = (this.Slick || {});
-
-Slick.parse = function(expression){
-	return parse(expression);
-};
-
-Slick.escapeRegExp = escapeRegExp;
-
-if (!this.Slick) this.Slick = Slick;
-
-}).apply(/*<CommonJS>*/(typeof exports != 'undefined') ? exports : /*</CommonJS>*/this);

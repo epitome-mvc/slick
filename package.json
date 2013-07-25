@@ -1,6 +1,6 @@
 {
-  "name": "slick",
-  "description": "Standalone CSS Selector Parser and Engine.",
+  "name": "slicker",
+  "description": "The MooTools Standalone CSS Selector Parser, just the parser for nodejs as a simple export",
   "url": "http://mootools.github.com/slick",
   "keywords": [
     "util",
@@ -16,8 +16,11 @@
     "Valerio Proietti",
     "Jan Kassens"
   ],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/epitome-mvc/slicker"
+	},
   "dependencies": [],
-  "lib": "Source",
-  "main": "./Source/slick.js",
-  "version": "1.0.1"
+  "main": "index.js",
+  "version": "0.0.0"
 }
