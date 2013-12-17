@@ -1,7 +1,6 @@
 {
   "name": "slicker",
-  "description": "The MooTools Standalone CSS Selector Parser, just the parser for nodejs as a simple export",
-  "url": "http://mootools.github.com/slick",
+  "description": "The Slick CSS selector parser, just the parser for nodejs / amd / browser as a simple export",
   "keywords": [
     "util",
     "dom",
