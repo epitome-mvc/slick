@@ -4,7 +4,7 @@
 	} else if (typeof module != 'undefined' && module.exports){
 		module.exports = factory();
 	} else {
-		this.Slick = factory();
+		this.slicker = factory();
 	}
 }).call(this, function(){
 	var parsed,
